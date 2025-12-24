@@ -1,6 +1,6 @@
-package com.educationloan.els.service.impl;
+package com.els.educationloansystem.service.impl;
 
-import com.educationloan.els.service.StudentService;
+import com.els.educationloansystem.service.StudentService;
 import org.springframework.stereotype.Service;
 
 @Service

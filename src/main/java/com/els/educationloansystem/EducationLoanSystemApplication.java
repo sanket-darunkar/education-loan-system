@@ -1,4 +1,4 @@
-package com.educationloan.els;
+package com.els.educationloansystem;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package com.educationloan.els.util;
+package com.els.educationloansystem.util;
 
 public class DateUtil {
     private DateUtil() {

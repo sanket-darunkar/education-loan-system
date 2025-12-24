@@ -1,4 +1,4 @@
-package com.educationloan.els.config;
+package com.els.educationloansystem.config;
 
 import org.springframework.context.annotation.Configuration;
 
