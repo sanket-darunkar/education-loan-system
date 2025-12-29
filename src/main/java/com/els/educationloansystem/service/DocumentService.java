@@ -12,7 +12,7 @@ import com.els.educationloansystem.entity.Document;
 
 
 public interface DocumentService {
-
+      
 	 void uploadDocument(DocumentDto dto, MultipartFile file);
 
 	    List<Document> getDocumentsByStudent(Long studentId);
