@@ -35,7 +35,7 @@ public class DocumentServiceImpl implements DocumentService {
 	    }
 
 	    Document document = new Document();
-	    document.setStudentID(dto.getStudentId());
+	    document.setStudentId(dto.getStudentId());
 	    document.setDocumentType(dto.getDocumentType());
 	    document.setFileName(fileName);
 	    document.setFilePath(path);
