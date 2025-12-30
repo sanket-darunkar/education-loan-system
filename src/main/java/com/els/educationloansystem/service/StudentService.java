@@ -1,4 +1,5 @@
 package com.els.educationloansystem.service;
 
-public interface StudentService {
+public interface StudentService  {
+	
 }
