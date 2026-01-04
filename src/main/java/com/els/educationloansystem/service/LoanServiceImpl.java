@@ -1,11 +1,13 @@
 package com.els.educationloansystem.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import com.els.educationloansystem.dto.LoanRequest;
 import com.els.educationloansystem.entity.LoanEligibility;
 import com.els.educationloansystem.repository.LoanRepository;
 
+@Service
 public class LoanServiceImpl  implements LoanService{
 	@Autowired
     private LoanRepository loanRepository;
