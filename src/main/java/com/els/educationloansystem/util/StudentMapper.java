@@ -13,7 +13,7 @@ public class StudentMapper {
 		s.setName(dto.getName());
 		s.setEmail(dto.getEmail());
 		s.setPassword(dto.getPassword());
-		s.setMobile(dto.getMobile());
+		
 		return s;
 	}
 	
@@ -22,7 +22,7 @@ public class StudentMapper {
 		dto.setName(student.getName());
 		dto.setEmail(student.getEmail());
 		dto.setPassword(student.getPassword());
-		dto.setMobile(student.getMobile());
+		
 		return dto;
 	}
 
