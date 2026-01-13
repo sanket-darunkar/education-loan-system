@@ -18,7 +18,7 @@ import com.els.educationloansystem.jwt.JwtUtil;
 import com.els.educationloansystem.service.StudentService;
 
 @RestController
-@CrossOrigin("*")
+//@CrossOrigin("*")
 @RequestMapping("/api/auth")
 public class StudentController {
 	
@@ -51,16 +51,25 @@ public class StudentController {
 	@PostMapping("/login")
 	public JWTResponse login(@RequestBody JWTRequest request) {
 
-		Authentication authentication = authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+	    Authentication authentication = authenticationManager
+	            .authenticate(
+	                new UsernamePasswordAuthenticationToken(
+	                    request.getEmail(),
+	                    request.getPassword()
+	                )
+	            );
 
-		if (authentication.isAuthenticated()) {
-			String token = jwtUtil.generateToken(request.getEmail());
-			return new JWTResponse(token);
-		}
+	    if (authentication.isAuthenticated()) {
+	        String token = jwtUtil.generateToken(
+	                request.getEmail(),
+	                "STUDENT"
+	        );
+	        return new JWTResponse(token);
+	    }
 
-		throw new RuntimeException("Invalid username or password");
+	    throw new RuntimeException("Invalid email or password");
 	}
+
 
 
 
