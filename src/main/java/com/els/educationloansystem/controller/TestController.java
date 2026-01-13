@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 
-@Controller
+@RestController
 public class TestController {
 
     @GetMapping("/run")
