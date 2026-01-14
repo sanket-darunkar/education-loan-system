@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import com.els.educationloansystem.dto.LoanApplicationRequest;
 import com.els.educationloansystem.entity.Student;
 import com.els.educationloansystem.repository.StudentRepository;
+
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,5 +81,10 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
         return applicationRepo.save(application);
     }
+
+	@Override
+	public @Nullable Object getAllApplicationsForAdmin() {
+		return this.applicationRepo.findAll();
+	}
 
 }
