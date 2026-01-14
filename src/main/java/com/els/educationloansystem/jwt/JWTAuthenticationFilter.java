@@ -1,12 +1,12 @@
 package com.els.educationloansystem.jwt;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -21,10 +21,20 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
+    
+    /**
+     * 🔥 VERY IMPORTANT
+     * Public endpoints ke liye JWT filter skip karo
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
 
-    @Autowired
-    private UserDetailsService userDetailsService;
-
+        return path.equals("/api/auth/register")
+                || path.equals("/api/auth/login")
+                || path.equals("/api/admin/login")
+                || "OPTIONS".equalsIgnoreCase(request.getMethod());
+    }
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -36,33 +46,36 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         if (header != null && header.startsWith("Bearer ")) {
 
             String token = header.substring(7);
-            String username = jwtUtil.extractUsername(token);
-
-            if (username != null &&
-                SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                UserDetails userDetails =
-                        userDetailsService.loadUserByUsername(username);
-
-                if (jwtUtil.validateToken(token, userDetails)) {
-
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities());
-
-                    authentication.setDetails(
-                            new WebAuthenticationDetailsSource()
-                                    .buildDetails(request));
-
-                    SecurityContextHolder.getContext()
-                            .setAuthentication(authentication);
-                }
+            // token expired → just continue (unauthenticated)
+            if (jwtUtil.isTokenExpired(token)) {
+                filterChain.doFilter(request, response);
+                return;
             }
-        }
 
-        filterChain.doFilter(request, response);
-    }
+            String email = jwtUtil.extractUsername(token);
+            String role = jwtUtil.extractRole(token);
+            
+            if (email != null && role != null &&
+                    SecurityContextHolder.getContext().getAuthentication() == null) {
+            	 List<SimpleGrantedAuthority> authorities =
+                         List.of(new SimpleGrantedAuthority("ROLE_" + role));
+            	 
+            	 UsernamePasswordAuthenticationToken authentication =
+                         new UsernamePasswordAuthenticationToken(
+                                 email,
+                                 null,
+                                 authorities
+                         );
+            	 
+            	 authentication.setDetails(
+                         new WebAuthenticationDetailsSource()
+                                 .buildDetails(request));
+            
+            	  SecurityContextHolder.getContext()
+                  .setAuthentication(authentication);
+      }
+  }
+
+  filterChain.doFilter(request, response);
 }
-
+}
