@@ -11,7 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("api/student/documents")
 @CrossOrigin
 public class DocumentController {
 
