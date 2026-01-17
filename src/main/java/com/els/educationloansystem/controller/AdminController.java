@@ -18,6 +18,7 @@ import com.els.educationloansystem.jwt.JWTResponse;
 import com.els.educationloansystem.jwt.JwtUtil;
 import com.els.educationloansystem.repository.DocumentRepository;
 import com.els.educationloansystem.repository.LoanApplicationRepository;
+import com.els.educationloansystem.repository.StudentRepository;
 import com.els.educationloansystem.service.LoanApplicationService;
 
 @RestController
@@ -36,6 +37,8 @@ public class AdminController {
 
     @Autowired
     private AuthenticationManager authenticationManager;
+    
+    @Autowired StudentRepository studentRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -155,4 +158,22 @@ public class AdminController {
 
         return ResponseEntity.ok(trend);
     }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/approvals")
+    public ResponseEntity<?> getApplicationsForApproval() {
+
+        // Only PENDING applications
+        return ResponseEntity.ok(
+            loanApplicationRepository.findByApplicationStatus("PENDING")
+        );
+    }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/students")
+    public ResponseEntity<?> getAllStudents() {
+        return ResponseEntity.ok(studentRepository.findAll());
+    }
+
+
 }
