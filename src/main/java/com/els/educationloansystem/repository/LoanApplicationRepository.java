@@ -14,6 +14,11 @@ public interface LoanApplicationRepository
         extends JpaRepository<LoanApplication, Long> {
 
     long count();
+    
+    long countByStudentId(Long studentId);
+
+    long countByStudentIdAndApplicationStatus(Long studentId, String status);
+
 
     long countByApplicationStatus(String applicationStatus);
 
@@ -28,4 +33,8 @@ public interface LoanApplicationRepository
 
 	@Nullable
 	Object findByApplicationStatus(String string);
+	
+	List<LoanApplication> findByStudent_Id(Long studentId);
+
+	List<LoanApplication> findByStudentId(Long id);
 }
