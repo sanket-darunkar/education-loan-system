@@ -10,4 +10,6 @@ import java.util.List;
 public interface DocumentRepository extends JpaRepository<Document, Long> {
 
 	List<Document> findByLoanApplication_ApplicationId(Long applicationId);
+	
+	long countByVerificationStatus(String verificationStatus);
 }

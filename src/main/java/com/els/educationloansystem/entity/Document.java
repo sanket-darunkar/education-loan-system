@@ -5,6 +5,8 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Data
 public class Document {
@@ -15,12 +17,13 @@ public class Document {
 
 	private String documentType;          // Aadhaar, PAN, Admission Letter
 	private String documentUrl;           // file path or cloud url
-	private LocalDate uploadedDate;
+	private LocalDate uploadedDate = LocalDate.now();
 
 	private String verificationStatus;    // PENDING / VERIFIED / REJECTED
 
 	@ManyToOne
 	@JoinColumn(name = "application_id")
+    @JsonBackReference   // ✅ STOPS LOOP
 	private LoanApplication loanApplication;
 }
 

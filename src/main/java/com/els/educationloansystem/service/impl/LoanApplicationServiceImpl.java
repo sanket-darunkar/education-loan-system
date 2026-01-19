@@ -2,18 +2,19 @@ package com.els.educationloansystem.service.impl;
 
 import java.time.LocalDate;
 
-import com.els.educationloansystem.dto.LoanApplicationRequest;
-import com.els.educationloansystem.entity.Student;
-import com.els.educationloansystem.repository.StudentRepository;
-
 import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.els.educationloansystem.dto.LoanApplicationRequest;
 import com.els.educationloansystem.entity.Loan;
 import com.els.educationloansystem.entity.LoanApplication;
+import com.els.educationloansystem.entity.Student;
 import com.els.educationloansystem.repository.LoanApplicationRepository;
 import com.els.educationloansystem.repository.LoanRepository;
+import com.els.educationloansystem.repository.StudentRepository;
 import com.els.educationloansystem.service.LoanApplicationService;
 
 @Service
@@ -27,6 +28,8 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
 
     @Autowired
     private LoanRepository loanRepo;
+
+    // ================= ADMIN ACTIONS =================
 
     @Override
     public void approveLoan(Long applicationId) {
@@ -50,8 +53,6 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
     @Override
     public void rejectLoan(Long applicationId, String reason) {
 
-
-
         LoanApplication application = applicationRepo.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
@@ -61,15 +62,22 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
         applicationRepo.save(application);
     }
 
+    // ================= STUDENT ACTION =================
+
     @Override
     public LoanApplication applyLoan(LoanApplicationRequest request) {
 
-        Student student = studentRepository.findById(request.getStudentId()).
-                orElseThrow(() -> new RuntimeException("Student Not Found"));
+        // 🔥 GET LOGGED-IN USER FROM JWT (NOT FROM FRONTEND)
+        Authentication authentication =
+                SecurityContextHolder.getContext().getAuthentication();
+
+        String email = authentication.getName(); // email stored in JWT
+
+        Student student = studentRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
         LoanApplication application = new LoanApplication();
-
-        application.setStudent(student);
+        application.setStudent(student); // ✅ CORRECT STUDENT MAPPING
         application.setLoanAmount(request.getLoanAmount());
         application.setCourseName(request.getCourseName());
         application.setInstituteName(request.getInstituteName());
@@ -82,9 +90,10 @@ public class LoanApplicationServiceImpl implements LoanApplicationService {
         return applicationRepo.save(application);
     }
 
-	@Override
-	public @Nullable Object getAllApplicationsForAdmin() {
-		return this.applicationRepo.findAll();
-	}
+    // ================= ADMIN VIEW =================
 
+    @Override
+    public @Nullable Object getAllApplicationsForAdmin() {
+        return applicationRepo.findAll();
+    }
 }
