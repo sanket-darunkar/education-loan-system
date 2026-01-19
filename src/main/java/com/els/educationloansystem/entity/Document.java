@@ -17,7 +17,7 @@ public class Document {
 
 	private String documentType;          // Aadhaar, PAN, Admission Letter
 	private String documentUrl;           // file path or cloud url
-	private LocalDate uploadedDate;
+	private LocalDate uploadedDate = LocalDate.now();
 
 	private String verificationStatus;    // PENDING / VERIFIED / REJECTED
 
