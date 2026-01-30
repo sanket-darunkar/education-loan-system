@@ -28,10 +28,8 @@ public class LoanApplication {
 
     private LocalDate applicationDate = LocalDate.now();
 
-    /* 🔥 VERY IMPORTANT FIX */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id", nullable = false)
-    @JsonIgnore   // ✅ VERY IMPORTANT
     private Student student;
 
     @OneToMany(
@@ -39,5 +37,7 @@ public class LoanApplication {
         cascade = CascadeType.ALL,
         fetch = FetchType.LAZY
     )
+    @JsonIgnore
     private List<Document> documents;
 }
+
