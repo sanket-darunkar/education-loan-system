@@ -5,25 +5,25 @@ import lombok.Data;
 
 import java.time.LocalDate;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Data
 public class Document {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long documentId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long documentId;
 
-	private String documentType;          // Aadhaar, PAN, Admission Letter
-	private String documentUrl;           // file path or cloud url
-	private LocalDate uploadedDate = LocalDate.now();
+    private String documentType;
+    private String documentUrl;
+    private LocalDate uploadedDate = LocalDate.now();
+    private String verificationStatus;
 
-	private String verificationStatus;    // PENDING / VERIFIED / REJECTED
-
-	@ManyToOne
-	@JoinColumn(name = "application_id")
-    @JsonBackReference   // ✅ STOPS LOOP
-	private LoanApplication loanApplication;
+    @ManyToOne
+    @JoinColumn(name = "application_id")
+    @JsonIgnore
+    private LoanApplication loanApplication;
 }
 
