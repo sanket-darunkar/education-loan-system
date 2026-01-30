@@ -8,10 +8,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdminDashboardSummaryDto {
-	
-	 private long totalApplications;
-	    private long pendingDocuments;
-	    private long incorrectDocuments;
-	    private long approvedLoans;
 
+    private long totalApplications;
+
+    private long approvedApplications;
+    private long rejectedApplications;
+    private long pendingApplications;
+
+    private long pendingDocuments;
+    private long incorrectDocuments;
 }

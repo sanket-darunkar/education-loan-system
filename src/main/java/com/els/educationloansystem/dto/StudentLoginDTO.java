@@ -1,5 +1,4 @@
 package com.els.educationloansystem.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,10 +6,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoanApplicationRequest {
+public class StudentLoginDTO {
 
-    private Double loanAmount;
-    private String courseName;
-    private String instituteName;
-    private Integer courseDuration;
-}
+        private String email;
+        private String password;
+    }
+
