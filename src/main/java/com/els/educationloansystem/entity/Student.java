@@ -32,4 +32,6 @@ public class Student {
     @OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<LoanApplication> loanApplications;
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL)
+    private StudentProfile profile;
 }
