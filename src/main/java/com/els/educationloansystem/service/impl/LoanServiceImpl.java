@@ -1,20 +1,18 @@
 package com.els.educationloansystem.service.impl;
 
-
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.els.educationloansystem.dto.LoanRequest;
 import com.els.educationloansystem.entity.LoanEligibility;
-import com.els.educationloansystem.repository.LoanRepository;
+import com.els.educationloansystem.repository.LoanEligibilityRepository;
 import com.els.educationloansystem.service.LoanService;
 
-
 @Service
-public class LoanServiceImpl  implements LoanService{
-	@Autowired
-    private LoanRepository loanRepository;
+public class LoanServiceImpl implements LoanService {
+
+    @Autowired
+    private LoanEligibilityRepository eligibilityRepository;
 
     @Override
     public String checkEligibility(LoanRequest request) {
@@ -34,6 +32,7 @@ public class LoanServiceImpl  implements LoanService{
         if (request.getCibilScore() < 650)
             return "NOT ELIGIBLE: Low CIBIL score";
 
+        // ✅ SAVE ELIGIBILITY RESULT
         LoanEligibility entity = new LoanEligibility();
         entity.setStudentAge(request.getStudentAge());
         entity.setAcademicPercentage(request.getAcademicPercentage());
@@ -43,9 +42,8 @@ public class LoanServiceImpl  implements LoanService{
         entity.setCibilScore(request.getCibilScore());
         entity.setEligibilityStatus("ELIGIBLE");
 
-        loanRepository.save(entity);
+        eligibilityRepository.save(entity); // ✅ CORRECT
 
         return "ELIGIBLE";
     }
-
 }
