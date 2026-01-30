@@ -6,19 +6,22 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.els.educationloansystem.dto.AdminApplicationDetailsDto;
 import com.els.educationloansystem.dto.AdminApplicationsTrendDto;
 import com.els.educationloansystem.dto.AdminDashboardSummaryDto;
+import com.els.educationloansystem.dto.AdminLoanApplicationDto;
 import com.els.educationloansystem.jwt.JWTRequest;
 import com.els.educationloansystem.jwt.JWTResponse;
 import com.els.educationloansystem.jwt.JwtUtil;
 import com.els.educationloansystem.repository.DocumentRepository;
 import com.els.educationloansystem.repository.LoanApplicationRepository;
 import com.els.educationloansystem.repository.StudentRepository;
+import com.els.educationloansystem.service.AdminApplicationService;
+import com.els.educationloansystem.service.AdminService;
 import com.els.educationloansystem.service.LoanApplicationService;
 
 @RestController
@@ -27,101 +30,100 @@ import com.els.educationloansystem.service.LoanApplicationService;
 public class AdminController {
 
     @Autowired
-    private LoanApplicationRepository loanApplicationRepository;
+    private AdminApplicationService adminApplicationService;
 
     @Autowired
-    private DocumentRepository documentRepository;
+    private LoanApplicationService loanService;
 
     @Autowired
-    private LoanApplicationService loanApplicationService;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    
-    @Autowired StudentRepository studentRepository;
+    private AdminService adminService;
 
     @Autowired
     private JwtUtil jwtUtil;
+    
+    @Autowired LoanApplicationRepository loanApplicationRepository;
 
-    // ===== ADMIN LOGIN =====
+    @Autowired
+    DocumentRepository documentRepository;
+   
+    @Autowired StudentRepository studentRepository;
     @PostMapping("/login")
     public JWTResponse adminLogin(@RequestBody JWTRequest request) {
 
-        Authentication authentication =
-                authenticationManager.authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                request.getEmail(),
-                                request.getPassword()
-                        )
+        Authentication auth =
+                adminService.authenticate(
+                        request.getEmail(),
+                        request.getPassword()
                 );
 
-        if (authentication.isAuthenticated()) {
-            String token = jwtUtil.generateToken(
-                    request.getEmail(),
-                    "ADMIN"
-            );
-            return new JWTResponse(token);
-        }
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
-        throw new RuntimeException("Invalid admin credentials");
+        String token = jwtUtil.generateToken(
+                request.getEmail(),
+                "ADMIN"
+        );
+
+        return new JWTResponse(token);
     }
 
-    // ===== ALL APPLICATIONS =====
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/applications")
-    public ResponseEntity<?> getAllApplications() {
+    public ResponseEntity<List<AdminLoanApplicationDto>> getAllApplications() {
         return ResponseEntity.ok(
-                loanApplicationService.getAllApplicationsForAdmin()
+                adminApplicationService.getAllApplications()
         );
     }
 
-    // ===== APPROVE =====
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/applications/{applicationId}")
+    public ResponseEntity<AdminApplicationDetailsDto> getApplicationDetails(
+            @PathVariable Long applicationId
+    ) {
+        return ResponseEntity.ok(
+                adminApplicationService.getApplicationDetails(applicationId)
+        );
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/approve/{applicationId}")
-    public ResponseEntity<String> approveLoan(
-            @PathVariable Long applicationId) {
-
-        loanApplicationService.approveLoan(applicationId);
-        return ResponseEntity.ok("Loan Approved Successfully");
+    public ResponseEntity<String> approve(@PathVariable Long applicationId) {
+        loanService.approveLoan(applicationId);
+        return ResponseEntity.ok("Approved");
     }
 
-    // ===== REJECT =====
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/reject/{applicationId}")
-    public ResponseEntity<String> rejectLoan(
+    public ResponseEntity<String> reject(
             @PathVariable Long applicationId,
-            @RequestParam String reason) {
-
-        loanApplicationService.rejectLoan(applicationId, reason);
-        return ResponseEntity.ok("Loan Rejected");
+            @RequestParam String reason
+    ) {
+        loanService.rejectLoan(applicationId, reason);
+        return ResponseEntity.ok("Rejected");
     }
-
-    // ===== ADMIN PROFILE =====
+    
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/me")
-    public ResponseEntity<?> getAdminProfile(Authentication auth) {
+    public ResponseEntity<?> adminMe(Authentication authentication) {
 
         return ResponseEntity.ok(
-                Map.of(
-                        "name", auth.getName(),
-                        "role", "ADMIN"
-                )
+            Map.of(
+                "email", authentication.getName(),
+                "role", "ADMIN"
+            )
         );
     }
-
-    // ===== DASHBOARD SUMMARY =====
+    
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/dashboard/summary")
     public ResponseEntity<AdminDashboardSummaryDto> getDashboardSummary() {
 
-        long total = loanApplicationRepository.count();
+    	long total = loanApplicationRepository.count();
         long approved =
                 loanApplicationRepository.countByApplicationStatus("APPROVED");
         long rejected =
                 loanApplicationRepository.countByApplicationStatus("REJECTED");
         long pending =
                 loanApplicationRepository.countByApplicationStatus("PENDING");
-
         long pendingDocs =
                 documentRepository.countByVerificationStatus("PENDING");
         long incorrectDocs =
@@ -138,8 +140,8 @@ public class AdminController {
                 )
         );
     }
-
-    // ===== DASHBOARD TREND =====
+    
+ // ===== DASHBOARD TREND =====
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/dashboard/trend")
     public ResponseEntity<List<AdminApplicationsTrendDto>>
@@ -158,6 +160,8 @@ public class AdminController {
 
         return ResponseEntity.ok(trend);
     }
+
+    
     
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/approvals")
@@ -174,6 +178,5 @@ public class AdminController {
     public ResponseEntity<?> getAllStudents() {
         return ResponseEntity.ok(studentRepository.findAll());
     }
-
 
 }
