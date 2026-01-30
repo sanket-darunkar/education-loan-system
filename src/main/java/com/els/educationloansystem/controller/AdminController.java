@@ -1,4 +1,6 @@
 package com.els.educationloansystem.controller;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -7,15 +9,24 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.els.educationloansystem.dto.AdminDashboardSummaryDto;
 import com.els.educationloansystem.jwt.JWTRequest;
 import com.els.educationloansystem.jwt.JWTResponse;
 import com.els.educationloansystem.jwt.JwtUtil;
+import com.els.educationloansystem.repository.DocumentRepository;
+import com.els.educationloansystem.repository.LoanApplicationRepository;
 import com.els.educationloansystem.service.LoanApplicationService;
 
 @RestController
 @RequestMapping("/api/admin")
 @CrossOrigin("*")
 public class AdminController {
+	
+	@Autowired
+	private LoanApplicationRepository loanApplicationRepository;
+
+	@Autowired
+	private DocumentRepository documentRepository;
 
     @Autowired
     private LoanApplicationService loanApplicationService;
@@ -77,4 +88,38 @@ public class AdminController {
         loanApplicationService.rejectLoan(applicationId, reason);
         return ResponseEntity.ok("Loan Rejected");
     }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/me")
+    public ResponseEntity<?> getAdminProfile(Authentication authentication) {
+
+        return ResponseEntity.ok(
+            Map.of(
+                "name", authentication.getName(),
+                "role", "ADMIN"
+            )
+        );
+    }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/dashboard/summary")
+    public ResponseEntity<AdminDashboardSummaryDto> getDashboardSummary() {
+
+        long totalApplications = loanApplicationRepository.count();
+        long approvedLoans = loanApplicationRepository.countByApplicationStatus("APPROVED");
+
+        long pendingDocuments = documentRepository.countByVerificationStatus("PENDING");
+        long incorrectDocuments = documentRepository.countByVerificationStatus("REJECTED");
+
+        AdminDashboardSummaryDto summary =
+            new AdminDashboardSummaryDto(
+                totalApplications,
+                pendingDocuments,
+                incorrectDocuments,
+                approvedLoans
+            );
+
+        return ResponseEntity.ok(summary);
+    }
+
 }

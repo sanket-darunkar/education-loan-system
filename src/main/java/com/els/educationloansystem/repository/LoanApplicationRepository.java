@@ -5,5 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 
 public interface LoanApplicationRepository extends JpaRepository<LoanApplication, Long> {
+	 long count();
 
+	    long countByApplicationStatus(String applicationStatus);
 }
