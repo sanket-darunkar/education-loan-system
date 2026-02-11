@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class LoanApplicationRequest {
+public class StudentLoanStatusSummaryDto {
 
-    private Double loanAmount;
-    private String courseName;
-    private String instituteName;
-    private Integer courseDuration;
+    private long total;
+    private long approved;
+    private long pending;
+    private long rejected;
 }

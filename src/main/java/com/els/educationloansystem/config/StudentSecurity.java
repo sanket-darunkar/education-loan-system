@@ -30,61 +30,67 @@ public class StudentSecurity {
     @Autowired
     private CorsConfigurationSource corsConfigurationSource;
 
-    // ✅ PASSWORD ENCODER
+    /* PASSWORD ENCODER */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ AUTHENTICATION MANAGER
+    /* AUTH MANAGER */
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
-    // ✅ SECURITY FILTER CHAIN
+    /* SECURITY FILTER */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-            // ✅ Enable CORS
+            /* CORS */
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
 
-            // ✅ Disable CSRF (JWT based)
+            /* CSRF */
             .csrf(csrf -> csrf.disable())
 
-            // ✅ Stateless session
+            /* FRAME OPTIONS (🔥 REQUIRED FOR IFRAME) */
+            .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+
+            /* STATELESS */
             .sessionManagement(session ->
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-            // ✅ Exception handling
+            /* AUTH ERROR HANDLER */
             .exceptionHandling(ex ->
                 ex.authenticationEntryPoint(jwtAuthenticationEntryPoint)
             )
 
-            // ✅ Authorization rules
+            /* AUTH RULES */
             .authorizeHttpRequests(auth -> auth
 
-                // 🔓 Public APIs
+                /* PUBLIC */
                 .requestMatchers(
                     "/api/auth/login",
                     "/api/auth/register",
                     "/api/admin/login"
                 ).permitAll()
 
-                // 🔐 Admin APIs
+                /* 🔥 DOCUMENT PREVIEW (IFRAME SAFE) */
+                .requestMatchers("/api/admin/viewdocuments/view/**").permitAll()
+
+                /* ADMIN (SECURED) */
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                // 🔐 Student APIs
+                /* STUDENT */
                 .requestMatchers("/api/student/**").hasRole("STUDENT")
 
-                // 🔒 Everything else
+                /* EVERYTHING ELSE */
                 .anyRequest().authenticated()
             );
 
-        // 🔥 JWT FILTER
+        /* JWT FILTER */
         http.addFilterBefore(
             jwtAuthenticationFilter,
             UsernamePasswordAuthenticationFilter.class
